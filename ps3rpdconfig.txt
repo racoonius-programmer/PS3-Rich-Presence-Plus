@@ -1,0 +1,8 @@
+{
+    "ip": "192.168.1.26",
+    "client_id": 780389261870235650,
+    "wait_seconds": 45,
+    "show_temp": false,
+    "show_xmb": false,
+    "hibernate_seconds": 10
+}
