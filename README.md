@@ -1,15 +1,20 @@
-# PS3-Rich-Presence-Plus
-Discord Rich Presence script for PS3 consoles on HFW&HEN or CFW.
+# PS3 Rich Presence Plus
 
-Display what game you are playing on PS3 via your PC!
- 
-# Main Additions
-* Changes networkscan for concurrent.futures dependences.
-* Adds WebMAN to search for cover images.
-* Adds Regex to change game titles that end on game versions (Ex: "1.00")
-* Adds show_xmb to the config file to hide the status while you're on the PS3 menu.
+Discord Rich Presence para PS3 con HEN/CFW y webMAN MOD.
 
-## Display Example
+Muestra en Discord el juego que estás usando actualmente en tu PS3 desde tu PC.
+
+Forkeado desde el repo de [zorua98741](https://github.com/zorua98741/PS3-Rich-Presence-for-Discord).
+
+## Cambios
+
+- Cambia `networkscan` por `concurrent.futures`.
+- Añade webMAN como repositorio para buscar imágenes de los juegos.
+- Añade expresiones regulares para limpiar títulos de juegos cuando aparezcan con versiones en el nombre, por ejemplo `1.00`.
+- Añade `show_xmb` a la configuración para alternar si se muestra el estado mientras estás en el XMB.
+- Mejor detección de juegos de PS2 Classics.
+
+## Ejemplos de Status
 <table>
 	<tr>
 		<td>XMB</td>
@@ -26,44 +31,59 @@ Display what game you are playing on PS3 via your PC!
 </table>
 
 
-## Usage
+## ¿Cómo usar?
 
-### Requirements
-* PS3 with either HFW&HEN, or CFW installed
-* PS3 with [webmanMOD](https://github.com/aldostools/webMAN-MOD/releases) installed 
-* PS3 and PC on the same network/internet connection
-* Discord installed and open on the PC running the script
-* A Python 3.9 interpreter installed on the PC if you do not wish to use the executable file
-* __requirements.txt Python dependences installed.__
+### Requisitos
+
+- PS3 con HFW y HEN, o con CFW instalado.
+- PS3 con [webMAN MOD](https://github.com/aldostools/webMAN-MOD/releases) instalado.
+- PS3 y PC conectados a la misma red; el script buscará la IP automáticamente.
+- Discord instalado y abierto con el script en ejecución.
+- Python 3.9 o superior instalado.
+- Instalar las dependencias desde `requirements.txt`.
 
 ### Windows
-* Clone the repo
-* Launch PS3RPD.pyw
 
-### Optional (Start at Boot)
-* If you want it to start at boot, create a shortcut of the PS3RPD.pyw, 
-* Press Win + R and paste "shell:startup"
-* Paste the shortcut in that folder.
+- Clona el repositorio.
+- Ejecuta `PS3RPD.pyw`.
 
+### Opcional: iniciar al prender el PC
 
-## Limitations
-* __A PC must be used to display presence, there is no way to install and use this script solely on the PS3__
-* The script relies on webmanMOD, and a major change to it will break this script, please message me about updated versions of webman so that i can test the script with them
-* PSX and PS2 game name depends on the name of the file
-* PSX and PS2 game detection will **not** work on PSN .pkg versions because webman cannot show those games as mounted/playing.
-* PS2 ISO game detection can be inconsistent, varying on degree of consistency by the value of "Refresh time."
+- Si quieres que arranque al iniciar el PC, crea un acceso directo de `PS3RPD.pyw`.
+- Presiona `Win + R` y escribe `shell:startup`.
+- Pega el acceso directo en esa carpeta.
 
+## Limitaciones
 
-## Additional Information
+- Se necesita un PC para mostrar el estado; no se puede instalar y usar este script solo en la PS3.
+- El script depende de webMAN MOD, así que un cambio importante en su estructura puede romperlo.
+- Los nombres de juegos de PSX y PS2 dependen del nombre del archivo.
+- La detección de juegos PSX y PS2 no funcionará con versiones PSN `.pkg`, porque webMAN no puede mostrar esos juegos como montados o en ejecución.
+- La detección de juegos PS2 ISO puede ser inconsistente, dependiendo del tiempo de refresco.
 
-### GameTDB + Webman
-This script uses images provided by [GameTDB](https://www.gametdb.com/) and [Aldostools (WebMAN)](https://raw.githubusercontent.com/aldostools/Resources). If you are able, consider supporting them.
+## Información adicional
 
-### External config file
-PS3RPD makes use of an external config file to persistently store a few variables, on creation, the default values will be:
-* Your PS3's IP address 	(If you don't know it will search it automatically until find a PS3 with enabled HEN.)
-* zorua98741 Discord developer application's ID 		(where the script will send presence data to)
-* A refresh time of 45 seconds 				 (how often will get new data)
-* To show the PS3's temperature
-* To show Rich Prescense if you're on XMB
-* A hibernate time of 10 seconds (waiting time to search for IP's again)
+### GameTDB + webMAN
+
+Este script usa imágenes proporcionadas por [GameTDB](https://www.gametdb.com/) y [Aldostools / webMAN](https://raw.githubusercontent.com/aldostools/Resources). Si puedes, considera apoyar a sus autores.
+
+### Archivo de configuración externo
+
+PS3RPD usa un archivo de configuración externo para guardar de forma persistente algunas variables. Al crearse, los valores por defecto serán:
+
+- La IP de tu PS3. Si no la conoces, el script la buscará automáticamente hasta encontrar una PS3 con HEN activado.
+- El ID de la aplicación de Discord de `zorua98741`, donde el script enviará los datos del estado.
+- Un tiempo de actualización de 45 segundos, que define cada cuánto se obtienen nuevos datos.
+- Mostrar la temperatura de la PS3.
+- Mostrar Rich Presence mientras estás en el XMB.
+- Un tiempo de hibernación de 10 segundos, que sirve de espera antes de volver a buscar IPs.
+
+## Notas sobre PS2 Classics
+
+- PS2 Classics puede requerir una detección más flexible, porque webMAN no siempre muestra la misma estructura HTML.
+- Si un juego de PS2 Classics no aparece en el estado, normalmente el problema está en cómo webMAN está exponiendo el nombre o la ruta del juego.
+- En HEN, los PS2 ISO suelen requerir estar preparados como `.BIN.ENC` para poder ejecutarse correctamente.
+
+## Soporte y apoyo
+
+Este proyecto usa imágenes e información de GameTDB y webMAN MOD. Si te sirve el proyecto, considera apoyar a sus desarrolladores.
