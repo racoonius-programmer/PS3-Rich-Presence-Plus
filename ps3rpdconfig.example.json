@@ -1,0 +1,12 @@
+{
+    "ip": "0.0.0.0",
+    "client_id": 780389261870235650,
+    "wait_seconds": 45,
+    "show_temp": false,
+    "show_xmb": false,
+    "hibernate_seconds": 10,
+    "steamgriddb_api_key": "",
+    "prefer_square_covers": true,
+    "manual_sgdb_map": {},
+    "manual_grid_map": {}
+}

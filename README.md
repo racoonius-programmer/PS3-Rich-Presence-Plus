@@ -9,7 +9,8 @@ Forkeado desde el repo de [zorua98741](https://github.com/zorua98741/PS3-Rich-Pr
 ## Cambios
 
 - Cambia `networkscan` por `concurrent.futures`.
-- Añade webMAN como repositorio para buscar imágenes de los juegos.
+- Busca IP continuamente, al dejar de detectar una consola continúa buscando.
+- Añade SteamGridDB (funciona solo con API Key, genera la tuya [aquí](https://www.steamgriddb.com/profile/preferences/api)) y webMAN como repositorio para buscar imágenes de los juegos.
 - Añade expresiones regulares para limpiar títulos de juegos cuando aparezcan con versiones en el nombre, por ejemplo `1.00`.
 - Añade `show_xmb` a la configuración para alternar si se muestra el estado mientras estás en el XMB.
 - Mejor detección de juegos de PS2 Classics.

@@ -49,7 +49,7 @@ class SafeLogger(object):
 sys.stdout = SafeLogger()
 sys.stderr = sys.stdout
 
-print("--- PS3RPD Initializing ---")
+print("--- PS3RPD: VERSIÓN HOT-RELOAD ---")
 
 config_path = Path("ps3rpdconfig.json")
 cache_path = Path("ps3rpd_cache.json")
