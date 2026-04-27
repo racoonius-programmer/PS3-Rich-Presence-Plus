@@ -4,6 +4,7 @@
     "wait_seconds": 45,
     "show_temp": false,
     "show_xmb": false,
+    "safe_webman_mode": true,
     "hibernate_seconds": 10,
     "steamgriddb_api_key": "",
     "prefer_square_covers": true,

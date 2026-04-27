@@ -29,6 +29,11 @@
             "sgdb_game_id": 5248314,
             "source": "square_grid",
             "selected_url": "https://cdn2.steamgriddb.com/grid/0641427e9032aa2968f6d2b0b4fc02a7.png"
+        },
+        "sly cooper: thieves in time™": {
+            "sgdb_game_id": 35240,
+            "source": "square_grid",
+            "selected_url": "https://cdn2.steamgriddb.com/grid/42195fdc69b4ba211ca30da3d0459c39.png"
         }
     }
 }

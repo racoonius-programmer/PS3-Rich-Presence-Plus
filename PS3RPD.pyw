@@ -60,6 +60,7 @@ default_config = {
     "wait_seconds": 45,
     "show_temp": False,
     "show_xmb": False,
+    "safe_webman_mode": True,
     "hibernate_seconds": 10,
     "steamgriddb_api_key": "",
     "prefer_square_covers": True,
@@ -451,6 +452,17 @@ class PS3Manager:
             except Exception:
                 pass
 
+        fallback_square_url = "https://cdn2.steamgriddb.com/grid/636ff76014a7300ea3c2b260a2edd559.webp"
+        try:
+            check = requests.head(fallback_square_url, timeout=2.5, allow_redirects=True)
+            if check.status_code == 200:
+                self.cover_cache[cache_key] = fallback_square_url
+                if game_name:
+                    self.cache_game_result(game_name, selected_url=fallback_square_url, source="fallback_square")
+                return fallback_square_url
+        except:
+            pass
+
         region_map = {'U': 'US', 'E': 'EN', 'J': 'JA', 'K': 'KO', 'A': 'EN'}
         region_code = region_map.get(title_id[2], 'EN')
         gametdb_url = f"https://art.gametdb.com/ps3/cover/{region_code}/{title_id}.jpg"
@@ -474,75 +486,119 @@ class PS3Manager:
 
     def get_game_status(self, ip):
         try:
-            url = f"http://{ip}/cpursx.ps3?/sman.ps3"
-            r = requests.get(url, headers=headers, timeout=5)
-            soup = BeautifulSoup(r.text, "html.parser")
             self.load_config()
             self.load_cache()
+
+            def parse_status_from_soup(current_soup):
+                parsed_image = "ps3"
+                parsed_title = "Menú Principal"
+                parsed_details = "XMB"
+                parsed_search_name = None
+                parsed_is_xmb = False
+                parsed_game_id = None
+                parsed_sgdb_game_id = None
+
+                if current_soup.find("a", target="_blank"):
+                    tag = current_soup.find("a", target="_blank")
+                    raw_id_tag = str(tag)
+                    try:
+                        parsed_game_id = re.search(r">(.*)<", raw_id_tag).group(1)
+                    except:
+                        parsed_game_id = ""
+
+                    raw_name = str(tag.find_next_sibling()).replace("\\n", "")
+                    try:
+                        full_name = re.search(r">(.*)<", raw_name).group(1)
+                        clean_name = self.extract_text_clean(full_name)
+                        parsed_details = clean_name.strip() if clean_name.strip() else "Juego PS3"
+                        parsed_search_name = parsed_details
+                    except:
+                        parsed_details = "Juego PS3"
+                        parsed_search_name = parsed_details
+
+                    parsed_title = "Jugando"
+                    cached_entry = self.get_cache_entry(parsed_search_name)
+                    cached_url = cached_entry.get("selected_url")
+                    cached_source = cached_entry.get("source")
+                    can_upgrade_fallback = bool(
+                        cached_url and
+                        cached_source == "fallback" and
+                        str(self.config.get("steamgriddb_api_key", "")).strip()
+                    )
+
+                    if cached_url and not can_upgrade_fallback:
+                        parsed_image = cached_entry["selected_url"]
+                    else:
+                        parsed_sgdb_game_id = cached_entry.get("sgdb_game_id") or self.search_sgdb_game_id(parsed_search_name)
+                        parsed_image = self.resolve_cover(parsed_game_id, game_name=parsed_search_name, sgdb_game_id=parsed_sgdb_game_id)
+
+                elif current_soup.find("a", href=re.compile(r"/(dev_hdd0|dev_usb00[0-9])/(PSXISO|PS2ISO)")):
+                    tag = current_soup.find("a", href=re.compile(r"/(dev_hdd0|dev_usb00[0-9])/(PSXISO|PS2ISO)"))
+                    try:
+                        parsed_details = re.search(r'">(.*)</a>', str(tag.find_next_sibling())).group(1)
+                        parsed_details = self.extract_text_clean(parsed_details)
+                    except:
+                        parsed_details = "Juego Retro"
+                    parsed_title = "Clásico"
+                    parsed_image = "retro"
+                else:
+                    parsed_is_xmb = True
+
+                return {
+                    "image": parsed_image,
+                    "title": parsed_title,
+                    "details": parsed_details,
+                    "search_name": parsed_search_name,
+                    "is_xmb": parsed_is_xmb,
+                    "game_id": parsed_game_id,
+                    "sgdb_game_id": parsed_sgdb_game_id
+                }
+
+            safe_webman_mode = bool(self.config.get("safe_webman_mode", True))
+            game_status_url = f"http://{ip}/sman.ps3" if safe_webman_mode else f"http://{ip}/cpursx.ps3?/sman.ps3"
+
+            r = requests.get(game_status_url, headers=headers, timeout=5)
+            if r.status_code != 200:
+                return None
+            soup = BeautifulSoup(r.text, "html.parser")
 
             state_text = None
             if self.config.get("show_temp", False):
                 try:
-                    temps = str(soup.find("a", href="/cpursx.ps3?up"))
+                    if safe_webman_mode:
+                        temp_r = requests.get(f"http://{ip}/cpursx.ps3", headers=headers, timeout=3)
+                        if temp_r.status_code != 200:
+                            raise ValueError("cpursx.ps3 no disponible")
+                        temp_soup = BeautifulSoup(temp_r.text, "html.parser")
+                        temps = str(temp_soup.find("a", href="/cpursx.ps3?up"))
+                    else:
+                        temps = str(soup.find("a", href="/cpursx.ps3?up"))
                     cpu = re.search(r"CPU(.+?)C", temps).group(0)
                     rsx = re.search(r"RSX(.+?)C", temps).group(0)
                     state_text = f"{cpu} | {rsx}"
                 except:
                     pass
 
-            image = "ps3"
-            title = "Menú Principal"
-            details = "XMB"
-            search_name = None
-            is_xmb = False
-            game_id = None
-            sgdb_game_id = None
+            parsed = parse_status_from_soup(soup)
 
-            if soup.find("a", target="_blank"):
-                tag = soup.find("a", target="_blank")
-                raw_id_tag = str(tag)
+            if safe_webman_mode and parsed["is_xmb"]:
                 try:
-                    game_id = re.search(r">(.*)<", raw_id_tag).group(1)
+                    legacy_r = requests.get(f"http://{ip}/cpursx.ps3?/sman.ps3", headers=headers, timeout=5)
+                    if legacy_r.status_code == 200:
+                        legacy_soup = BeautifulSoup(legacy_r.text, "html.parser")
+                        legacy_parsed = parse_status_from_soup(legacy_soup)
+                        if not legacy_parsed["is_xmb"]:
+                            parsed = legacy_parsed
                 except:
-                    game_id = ""
+                    pass
 
-                raw_name = str(tag.find_next_sibling()).replace("\\n", "")
-                try:
-                    full_name = re.search(r">(.*)<", raw_name).group(1)
-                    clean_name = self.extract_text_clean(full_name)
-                    details = clean_name.strip() if clean_name.strip() else "Juego PS3"
-                    search_name = details
-                except:
-                    details = "Juego PS3"
-                    search_name = details
-
-                title = "Jugando"
-                cached_entry = self.get_cache_entry(search_name)
-                cached_url = cached_entry.get("selected_url")
-                cached_source = cached_entry.get("source")
-                can_upgrade_fallback = bool(
-                    cached_url and
-                    cached_source == "fallback" and
-                    str(self.config.get("steamgriddb_api_key", "")).strip()
-                )
-
-                if cached_url and not can_upgrade_fallback:
-                    image = cached_entry["selected_url"]
-                else:
-                    sgdb_game_id = cached_entry.get("sgdb_game_id") or self.search_sgdb_game_id(search_name)
-                    image = self.resolve_cover(game_id, game_name=search_name, sgdb_game_id=sgdb_game_id)
-
-            elif soup.find("a", href=re.compile(r"/(dev_hdd0|dev_usb00[0-9])/(PSXISO|PS2ISO)")):
-                tag = soup.find("a", href=re.compile(r"/(dev_hdd0|dev_usb00[0-9])/(PSXISO|PS2ISO)"))
-                try:
-                    details = re.search(r'">(.*)</a>', str(tag.find_next_sibling())).group(1)
-                    details = self.extract_text_clean(details)
-                except:
-                    details = "Juego Retro"
-                title = "Clásico"
-                image = "retro"
-            else:
-                is_xmb = True
+            image = parsed["image"]
+            title = parsed["title"]
+            details = parsed["details"]
+            search_name = parsed["search_name"]
+            is_xmb = parsed["is_xmb"]
+            game_id = parsed["game_id"]
+            sgdb_game_id = parsed["sgdb_game_id"]
 
             large_text_value = details if not is_xmb else title
 
