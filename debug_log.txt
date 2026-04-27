@@ -1,9 +1,0 @@
---- PS3RPD: VERSIÓN HOT-RELOAD ---
-[SteamGridDB] API key cargada: 6a1811...5f04
-[SteamGridDB] Status HTTP: 200
-[SteamGridDB] OK. Resultados recibidos: 10
-Monitor activo en 192.168.1.17
-[COVER] grids/game/35240 dim=512x512 page=0 HTTP: 200
-[COVER] grids/game/35240 dim=1024x1024 page=0 HTTP: 200
-[COVER] Grid cuadrado elegido: id=144857 width=1024 height=1024 url=https://cdn2.steamgriddb.com/grid/42195fdc69b4ba211ca30da3d0459c39.png
-Cambio de juego detectado: Sly Cooper: Thieves in Time™
