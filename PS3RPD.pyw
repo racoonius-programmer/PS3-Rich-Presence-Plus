@@ -12,6 +12,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from pypresence import Presence
+from pypresence.types import StatusDisplayType
 
 try:
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -1061,7 +1062,7 @@ if __name__ == "__main__":
                         large_image=data["large_image"],
                         large_text=data["large_text"],
                         start=start_time,
-                        status_display_type=2
+                        status_display_type=StatusDisplayType.DETAILS
                     )
                 except Exception as e:
                     print(f"[RPC] update error: {e}")
