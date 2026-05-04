@@ -9,5 +9,6 @@
     "steamgriddb_api_key": "",
     "prefer_square_covers": true,
     "manual_sgdb_map": {},
-    "manual_grid_map": {}
+    "manual_grid_map": {},
+    "xmb_poll_seconds": 30
 }
