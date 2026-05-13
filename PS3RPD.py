@@ -82,6 +82,15 @@ default_config = {
         "game_poll_max_seconds": 300,
         "discovery_workers": 12,
         "discovery_window": 12
+        ,
+        # hide known homebrew/apps from presence
+        "hide_homebrew": False,
+        "homebrew_hide_list": [
+            "PSN Store",
+            "Apollo",
+            "multiMAN",
+            "webMAN"
+        ]
 }
 
 default_cache = {
@@ -591,6 +600,48 @@ class PS3Manager:
         self.cover_cache[cache_key] = "ps3_icon"
         return "ps3_icon"
 
+    def is_homebrew_app(self, details, search_name, title_text):
+        try:
+            hide_list = self.config.get("homebrew_hide_list", []) or []
+            if isinstance(hide_list, str):
+                hide_list = [hide_list]
+            hide_tokens = [h.lower().strip() for h in hide_list if h]
+            text = " ".join([str(details or ""), str(search_name or ""), str(title_text or "")]).lower()
+            if not text:
+                return False
+            for token in hide_tokens:
+                if token and token in text:
+                    return True
+            # fallback heuristics for common labels
+            fallback = [
+                "psn store",
+                "ps3 store",
+                "apollo",
+                "multiman",
+                "multiman",
+                "webman",
+                "webman mod",
+                "webmanmod",
+                "rebug",
+                "retroarch",
+                "irisman",
+                "ps3hen",
+                "hen",
+                "mamba",
+                "package manager",
+                "pkg installer",
+                "pkg",
+                "file manager",
+                "backup manager",
+                "qa flag"
+            ]
+            for f in fallback:
+                if f in text:
+                    return True
+            return False
+        except:
+            return False
+
     def get_game_status(self, ip):
         try:
             self.load_config()
@@ -989,9 +1040,18 @@ if __name__ == "__main__":
 
                 strikes = 0
 
-                if data["is_xmb"] and not app.config.get("show_xmb", False):
+                # decide if we should hide presence: either XMB or configured homebrew apps
+                hide_homebrew = bool(app.config.get("hide_homebrew", False))
+                is_homebrew = False
+                if hide_homebrew:
+                    is_homebrew = app.is_homebrew_app(data.get("details"), data.get("search_name"), data.get("large_text"))
+
+                if (data["is_xmb"] and not app.config.get("show_xmb", False)) or is_homebrew:
                     if app.rpc:
-                        print("En XMB (ocultando)...")
+                        if is_homebrew:
+                            print("App Homebrew detectada (ocultando)...")
+                        else:
+                            print("En XMB (ocultando)...")
                         app.disconnect_discord()
                         app.last_game_key = None
                         app.last_search_name = None

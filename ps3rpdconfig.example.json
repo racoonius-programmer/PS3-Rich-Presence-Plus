@@ -10,5 +10,27 @@
     "prefer_square_covers": true,
     "manual_sgdb_map": {},
     "manual_grid_map": {},
-    "xmb_poll_seconds": 30
+    "xmb_poll_seconds": 30,
+    "hide_homebrew": false,
+    "homebrew_hide_list": [
+        "PSN Store",
+        "PS3 Store",
+        "Apollo",
+        "multiMAN",
+        "multiMan",
+        "webMAN",
+        "webMAN Mod",
+        "WebMAN",
+        "Rebug",
+        "IrisMAN",
+        "PS3HEN",
+        "HEN",
+        "Mamba",
+        "Package Manager",
+        "PKG Installer",
+        "File Manager",
+        "Backup Manager",
+        "QA Flag",
+        "pkg"
+    ]
 }
